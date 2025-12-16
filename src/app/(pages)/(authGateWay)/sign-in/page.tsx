@@ -1,25 +1,58 @@
 "use client";
 
-import React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 import Input from "@/components/input";
 import Link from "next/link";
 import { object, string } from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import toast from "react-hot-toast";
+import { nestApi } from "@/lib/axios";
+import { useAuthStore } from "@/store/useAuthStore";
+import { LoginResponse } from "@/types/types";
 
 const schema = object({
   email: string().email("Invalid email address").required("Email is required"),
   password: string().required("Password is required"),
 });
 
+type FormValues = {
+  email: string;
+  password: string;
+};
+
 export default function SignInPage() {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: yupResolver(schema),
   });
-  const onSubmit = (data: object) => {
-    console.log("Form data:", data);
+
+  const { setToken, setUser } = useAuthStore();
+
+  const onSubmit = async (data: FormValues) => {
+    setIsLoading(true);
+    try {
+      const response = await nestApi.post<LoginResponse>("/auth/sign-in", data);
+      setToken(response.access_token);
+      setUser(response.user.email, response.user.username);
+
+      toast.success("Signed in successfully!");
+      router.push("/");
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to sign in");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <div className="flex h-full min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -39,10 +72,24 @@ export default function SignInPage() {
             {...register("email")}
           />
 
-          <Input type="password" placeholder="Password" label="Password" error={!!errors.password} errorMessage={(errors.password?.message as string) || ""} {...register("password")} />
-          <Button type="submit" label="Sign in" className="w-full" />
+          <Input
+            type="password"
+            placeholder="Password"
+            label="Password"
+            error={!!errors.password}
+            errorMessage={(errors.password?.message as string) || ""}
+            {...register("password")}
+          />
+
+          <Button
+            type="submit"
+            label={isLoading ? "Signing in..." : "Sign in"}
+            className="w-full"
+            disabled={isLoading}
+          />
         </form>
       </div>
+
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <p className="text-center text-sm text-gray-100">
           Don&apos;t have an account?{" "}

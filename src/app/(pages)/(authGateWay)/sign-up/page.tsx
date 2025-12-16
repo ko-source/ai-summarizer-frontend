@@ -1,19 +1,26 @@
 "use client";
 
-import React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Input from "@/components/input";
 import Button from "@/components/button";
 import Link from "next/link";
 import { object, string } from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { nestApi } from "@/lib/axios";
+import toast from "react-hot-toast";
+import { SignUpResponse } from "@/types/types";
 
 const schema = object({
+  username: string().required("Username is required"),
   email: string().email("Invalid email address").required("Email is required"),
-  password: string().required("Password is required"),
+  password: string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
 export default function SignUpPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -21,8 +28,22 @@ export default function SignUpPage() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  const onSubmit = (data: object) => {
-    console.log("Form data:", data);
+  
+  const onSubmit = async (data: { email: string; password: string; username: string }) => {
+    setIsLoading(true);
+    try {
+      const response = await nestApi.post<SignUpResponse>('/auth/sign-up', data);
+      if (response.statusCode === 201) {
+        router.push("/sign-in");
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to create account");
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <div className="flex h-full min-h-full flex-col justify-center px-6 py-12 lg:px-8">
@@ -34,6 +55,14 @@ export default function SignUpPage() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Input
+            type="text"
+            placeholder="Ali.."
+            label="Username"
+            error={!!errors.username}
+            errorMessage={(errors.username?.message as string) || ""}
+            {...register("username")}
+          />
           <Input
             type="email"
             placeholder="abc@gmail.com"
@@ -51,7 +80,7 @@ export default function SignUpPage() {
             errorMessage={(errors.password?.message as string) || ""}
             {...register("password")}
           />
-          <Button type="submit" label="Sign up" className="w-full" />
+          <Button type="submit" label={isLoading ? "Creating account..." : "Sign up"} className="w-full" disabled={isLoading} />
         </form>
       </div>
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
