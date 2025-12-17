@@ -7,12 +7,10 @@ import toast from "react-hot-toast";
 import { useSummariesStore } from "@/store/useSummaryStore";
 import SummaryDetail from "@/components/Summaries/summaryDetail";
 import SummaryCard from "@/components/Summaries/summaryCard";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function Home() {
   const router = useRouter();
   const [text, setText] = useState("");
-  const { isAuthenticated, hasHydrated } = useAuthGuard();
 
   const {
     summaries,
@@ -23,10 +21,8 @@ export default function Home() {
   } = useSummariesStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadSummaries();
-    }
-  }, [isAuthenticated, loadSummaries]);
+    loadSummaries();
+  }, [loadSummaries]);
 
   const handleSummarize = async () => {
     if (!text.trim() || text.trim().length < 10) {
@@ -43,10 +39,6 @@ export default function Home() {
       setText("");
     }
   };
-
-  if (!hasHydrated || !isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="flex flex-col min-h-screen p-6 md:px-12 px-6 max-w-7xl mx-auto">

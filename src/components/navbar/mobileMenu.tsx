@@ -3,13 +3,8 @@
 import { DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { cn } from "@/lib/utils";
 import UserAvatar from "./userAvatar";
-import Button from "../button";
-
-interface NavItem {
-  name: string;
-  href: string;
-  current: boolean;
-}
+import { useRouter } from "next/navigation";
+import { NavItem } from "@/types/types";
 
 interface MobileMenuProps {
   items: NavItem[];
@@ -26,6 +21,8 @@ export default function MobileMenu({
   email,
   onLogout,
 }: MobileMenuProps) {
+  const router = useRouter();
+
   return (
     <DisclosurePanel className="sm:hidden">
       <>
@@ -55,14 +52,14 @@ export default function MobileMenu({
                 {items.map((item) => (
                   <DisclosureButton
                     key={item.name}
-                    as="a"
-                    href={item.href}
+                    as="button"
+                    onClick={() => router.push(item.href)}
                     aria-current={item.current ? "page" : undefined}
                     className={cn(
                       item.current
                         ? "bg-gray-950/50 text-white"
                         : "text-gray-300 hover:bg-white/5 hover:text-white",
-                      "block rounded-md px-3 py-2 text-base font-medium"
+                      "block rounded-md px-3 py-2 text-base font-medium cursor-pointer"
                     )}
                   >
                     {item.name}
@@ -72,12 +69,13 @@ export default function MobileMenu({
 
               {isAuthenticated && (
                 <div className="pt-4 border-t border-gray-700">
-                  <Button
-                    type="button"
-                    label="Logout"
+                  <DisclosureButton
+                    as="button"
                     onClick={onLogout}
-                    className=""
-                  />
+                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    Logout
+                  </DisclosureButton>
                 </div>
               )}
             </div>

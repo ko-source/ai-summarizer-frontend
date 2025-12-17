@@ -1,10 +1,7 @@
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  name: string;
-  href: string;
-  current: boolean;
-}
+import { useRouter } from "next/navigation";
+import { DisclosureButton } from "@headlessui/react";
+import { NavItem } from "@/types/types";
 
 interface DesktopNavigationProps {
   items: NavItem[];
@@ -13,23 +10,25 @@ interface DesktopNavigationProps {
 export default function DesktopNavigation({
   items,
 }: DesktopNavigationProps) {
+  const router = useRouter();
   return (
     <div className="hidden sm:ml-6 sm:block">
       <div className="flex space-x-4">
         {items.map((item) => (
-          <a
+          <DisclosureButton
             key={item.name}
-            href={item.href}
+            as="button"
+            onClick={() => router.push(item.href)}
             aria-current={item.current ? "page" : undefined}
             className={cn(
               item.current
                 ? "bg-gray-950/50 text-white"
                 : "text-gray-300 hover:bg-white/5 hover:text-white",
-              "rounded-md px-3 py-2 text-sm font-medium"
+              "rounded-md px-3 py-2 text-sm font-medium cursor-pointer"
             )}
           >
             {item.name}
-          </a>
+          </DisclosureButton>
         ))}
       </div>
     </div>

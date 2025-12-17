@@ -41,7 +41,11 @@ export default function SignInPage() {
     setIsLoading(true);
     try {
       const response = await nestApi.post<LoginResponse>("/auth/sign-in", data);
-      setToken(response.access_token);
+      const token = response.access_token;
+
+      document.cookie = `token=${token}; path=/`;
+
+      setToken(token);
       setUser(response.user.email, response.user.username);
 
       toast.success("Signed in successfully!");

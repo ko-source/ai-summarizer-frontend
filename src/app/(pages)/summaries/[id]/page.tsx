@@ -4,23 +4,21 @@ import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSummariesStore } from "@/store/useSummaryStore";
 import SummaryDetail from "@/components/Summaries/summaryDetail";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import ErrorMessage from "@/components/errorMessage";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export default function SummaryDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { isAuthenticated } = useAuthGuard();
   const { currentSummary, error, loadSummaryById } = useSummariesStore();
 
   const summaryId = params?.id ? Number(params.id) : null;
 
   useEffect(() => {
-    if (isAuthenticated && summaryId) {
+    if (summaryId) {
       loadSummaryById(summaryId);
     }
-  }, [isAuthenticated, summaryId, loadSummaryById]);
+  }, [summaryId, loadSummaryById]);
 
   if (!summaryId || isNaN(summaryId)) {
     return (

@@ -7,15 +7,16 @@ import DesktopUserMenu from "./navbar/desktopUserMenu";
 import MobileMenuButton from "./navbar/mobileMenuButton";
 import MobileMenu from "./navbar/mobileMenu";
 import UserAvatar from "./navbar/userAvatar";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { username, email, logout } = useAuthStore();
-  const { isAuthenticated } = useAuthGuard();
+  const { username, email, token, hasHydrated, logout } = useAuthStore();
+
+  const isAuthenticated = hasHydrated && !!token;
 
   const handleLogout = () => {
+    document.cookie = "token=; path=/; max-age=0";
     logout();
     router.push("/sign-in");
   };

@@ -22,4 +22,10 @@ export interface SummaryResponse {
   createdAt: string;
 }
 
+export interface NavItem {
+  name: string;
+  href: string;
+  current: boolean;
+}
+
 

@@ -4,19 +4,15 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSummariesStore } from "@/store/useSummaryStore";
 import SummaryCard from "@/components/Summaries/summaryCard";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import ErrorMessage from "@/components/errorMessage";
 
 export default function SummariesPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthGuard();
   const { summaries, error, loadSummaries } = useSummariesStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadSummaries();
-    }
-  }, [isAuthenticated, loadSummaries]);
+    loadSummaries();
+  }, [loadSummaries]);
 
   if (error) {
     return (
