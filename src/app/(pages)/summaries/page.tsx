@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSummariesStore } from "@/store/useSummaryStore";
+import { useSummariesStore } from "@/store/summaryStore";
 import SummaryCard from "@/components/Summaries/summaryCard";
 import ErrorMessage from "@/components/errorMessage";
 
@@ -37,7 +37,7 @@ export default function SummariesPage() {
               Create your first summary on the{" "}
               <button
                 onClick={() => router.push("/")}
-                className="text-indigo-400 hover:text-indigo-300 underline"
+                className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
               >
                 dashboard
               </button>

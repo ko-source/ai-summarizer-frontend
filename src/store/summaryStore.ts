@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { nestApi } from "@/lib/axios";
-import { useAuthStore } from "./useAuthStore";
+import { useAuthStore } from "./authStore";
 import type { SummaryResponse } from "@/types/types";
 
 type SummariesState = {
@@ -17,6 +17,12 @@ type SummariesState = {
   clearCurrentSummary: () => void;
 };
 
+const getAuthToken = (): string | null => useAuthStore.getState().token;
+
+const createAuthHeaders = (token: string) => ({
+  headers: { Authorization: `Bearer ${token}` },
+});
+
 export const useSummariesStore = create<SummariesState>((set, get) => ({
   summaries: [],
   currentSummary: null,
@@ -24,17 +30,15 @@ export const useSummariesStore = create<SummariesState>((set, get) => ({
   error: null,
 
   loadSummaries: async () => {
-    const token = useAuthStore.getState().token;
-    if (!token) {
-      set({ error: "Not authenticated" });
-      return;
-    }
+    const token = getAuthToken();
+    if (!token) return set({ error: "Not authenticated" });
 
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true, error: null });
-      const data = await nestApi.get<SummaryResponse[]>("/summaries", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await nestApi.get<SummaryResponse[]>(
+        "/summaries",
+        createAuthHeaders(token)
+      );
       set({ summaries: data, isLoading: false });
     } catch (err) {
       set({
@@ -45,17 +49,15 @@ export const useSummariesStore = create<SummariesState>((set, get) => ({
   },
 
   loadSummaryById: async (id: number) => {
-    const token = useAuthStore.getState().token;
-    if (!token) {
-      set({ error: "Not authenticated" });
-      return;
-    }
+    const token = getAuthToken();
+    if (!token) return set({ error: "Not authenticated" });
 
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true, error: null });
-      const data = await nestApi.get<SummaryResponse>(`/summaries/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await nestApi.get<SummaryResponse>(
+        `/summaries/${id}`,
+        createAuthHeaders(token)
+      );
       set({ currentSummary: data, isLoading: false });
     } catch (err) {
       set({
@@ -66,26 +68,20 @@ export const useSummariesStore = create<SummariesState>((set, get) => ({
   },
 
   summarizeText: async (text: string) => {
-    const token = useAuthStore.getState().token;
-    if (!token) {
-      set({ error: "Not authenticated" });
-      return;
-    }
+    const token = getAuthToken();
+    if (!token) return set({ error: "Not authenticated" });
 
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true, error: null });
       const result = await nestApi.post<SummaryResponse>(
         "/summaries",
         { text },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        createAuthHeaders(token)
       );
 
-      const prev = get().summaries;
       set({
         currentSummary: result,
-        summaries: [result, ...prev],
+        summaries: [result, ...get().summaries],
         isLoading: false,
       });
     } catch (err) {

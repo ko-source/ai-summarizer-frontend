@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu } from "@headlessui/react";
+import Button from "../button";
 import { cn } from "@/lib/utils";
 import UserAvatar from "./userAvatar";
 
@@ -30,15 +31,16 @@ export default function DesktopUserMenu({
         </div>
         <Menu.Item>
           {({ focus }) => (
-            <button
-              onClick={onLogout}
+              <Button
+              type="button"
+              label="Logout"
+              variant="secondary"
               className={cn(
                 focus ? "bg-gray-700" : "",
                 "block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors cursor-pointer"
               )}
-            >
-              Logout
-            </button>
+              onClick={onLogout}
+            />
           )}
         </Menu.Item>
       </Menu.Items>

@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { Disclosure } from "@headlessui/react";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store/authStore";
 import DesktopNavigation from "./navbar/desktopNavigation";
 import DesktopUserMenu from "./navbar/desktopUserMenu";
 import MobileMenuButton from "./navbar/mobileMenuButton";

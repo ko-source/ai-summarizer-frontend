@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useSummariesStore } from "@/store/useSummaryStore";
+import { useSummariesStore } from "@/store/summaryStore";
 import SummaryDetail from "@/components/Summaries/summaryDetail";
 import ErrorMessage from "@/components/errorMessage";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";

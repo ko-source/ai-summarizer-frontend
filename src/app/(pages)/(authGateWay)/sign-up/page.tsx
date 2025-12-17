@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { nestApi } from "@/lib/axios";
 import toast from "react-hot-toast";
-import { SignUpResponse } from "@/types/types";
+import { SignUpRequest, SignUpResponse } from "@/types/types";
 
 const schema = object({
   username: string().required("Username is required"),
@@ -29,7 +29,7 @@ export default function SignUpPage() {
     resolver: yupResolver(schema),
   });
   
-  const onSubmit = async (data: { email: string; password: string; username: string }) => {
+  const onSubmit = async (data: SignUpRequest) => {
     setIsLoading(true);
     try {
       const response = await nestApi.post<SignUpResponse>('/auth/sign-up', data);

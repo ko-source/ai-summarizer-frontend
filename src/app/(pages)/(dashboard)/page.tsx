@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 import toast from "react-hot-toast";
-import { useSummariesStore } from "@/store/useSummaryStore";
+import { useSummariesStore } from "@/store/summaryStore";
 import SummaryDetail from "@/components/Summaries/summaryDetail";
 import SummaryCard from "@/components/Summaries/summaryCard";
 
@@ -90,11 +90,11 @@ export default function Home() {
               )}
             </div>
             <div className="space-y-4">
-              {summaries.slice(0, 3).map((s) => (
+              {summaries.slice(0, 3).map((summary) => (
                 <SummaryCard
-                  key={s.id}
-                  summary={s}
-                  onClick={() => router.push(`/summaries/${s.id}`)}
+                  key={summary.id}
+                  summary={summary}
+                  onClick={() => router.push(`/summaries/${summary.id}`)}
                 />
               ))}
             </div>
