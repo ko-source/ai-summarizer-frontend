@@ -1,64 +1,16 @@
 import axios from "axios";
 
-
 type Config = {
   headers?: Record<string, string>;
-  responseType?:
-    | "arraybuffer"
-    | "blob"
-    | "document"
-    | "json"
-    | "text"
-    | "stream";
   [key: string]: unknown;
-};
-
-const handleAxiosError = (error: unknown) => {
-  const err = error as {
-    code?: string;
-    message?: string;
-    response?: { data?: { message?: string } };
-    isAxiosError?: boolean;
-  };
-
-  if (err?.code === "ECONNABORTED" || err?.message?.includes("timeout")) {
-    throw new Error(
-      "Request timed out. Please try again or check your internet connection."
-    );
-  }
-
-  if (err?.code === "ECONNREFUSED") {
-    throw new Error(
-      "Unable to connect to the server. Please check if the server is running."
-    );
-  }
-
-  if (err?.message === "Network Error") {
-    throw new Error("Network error. Please check your internet connection.");
-  }
-
-  if (err?.response?.data) {
-    const message = err.response.data.message || "An error occurred";
-    throw new Error(message);
-  }
-
-  throw error;
 };
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL!,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
   withCredentials: true,
   timeout: 20000,
-  validateStatus: (status) => {
-    return status >= 200 && status < 500;
-  },
-});
-
-api.interceptors.request.use((config) => {
-  return config;
+  validateStatus: (status) => status >= 200 && status < 500,
 });
 
 api.interceptors.response.use(
@@ -66,10 +18,8 @@ api.interceptors.response.use(
   (error) => {
     if (typeof window !== "undefined" && error?.response?.status === 401) {
       window.location.href = "/sign-in";
-      return Promise.reject(error);
     }
-
-    return Promise.reject(handleAxiosError(error));
+    throw error;
   }
 );
 
@@ -80,11 +30,11 @@ const retryRequest = async <T>(
 ): Promise<T> => {
   try {
     return await requestFn();
-  } catch (error: unknown) {
+  } catch (error) {
     const err = error as {
       code?: string;
       message?: string;
-      response?: { status?: number; data?: { message?: string } };
+      response?: { status?: number };
     };
 
     const shouldRetry =
@@ -96,10 +46,10 @@ const retryRequest = async <T>(
         err?.message === "Network Error");
 
     if (shouldRetry) {
-      const jitter = Math.random() * 100;
-      const backoffDelay = delay * 2 + jitter;
-      await new Promise((resolve) => setTimeout(resolve, backoffDelay));
-      return retryRequest(requestFn, retries - 1, backoffDelay);
+      await new Promise((resolve) =>
+        setTimeout(resolve, delay * 2 + Math.random() * 100)
+      );
+      return retryRequest(requestFn, retries - 1, delay * 2);
     }
 
     throw error;
