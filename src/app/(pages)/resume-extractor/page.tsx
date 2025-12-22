@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { mixed, object } from "yup";
 import Button from "@/components/button";
@@ -58,7 +58,6 @@ export default function ResumeExtractorPage() {
     control,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: yupResolver(schema) as never,
@@ -67,7 +66,7 @@ export default function ResumeExtractorPage() {
     },
   });
 
-  const file = watch("file");
+  const file = useWatch({ control, name: "file" });
 
   const handleFileSelect = (selectedFile: File | null) => {
     if (selectedFile) {
@@ -118,10 +117,10 @@ export default function ResumeExtractorPage() {
 
   const formatSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
-    const k = 1024;
+    const KB_SIZE = 1024;
     const sizes = ["Bytes", "KB", "MB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+    const index = Math.floor(Math.log(bytes) / Math.log(KB_SIZE));
+    return Math.round((bytes / Math.pow(KB_SIZE, index)) * 100) / 100 + " " + sizes[index];
   };
 
   return (
