@@ -22,6 +22,35 @@ export interface SummaryResponse {
   createdAt: string;
 }
 
+export interface ExperienceItem {
+  company?: string;
+  title?: string;
+  startDate?: string;
+  endDate?: string | null;
+  description?: string;
+  location?: string;
+}
+
+export interface EducationItem {
+  institution?: string;
+  area?: string;
+  studyType?: string;
+  startDate?: string;
+  endDate?: string | null;
+  score?: string;
+}
+
+export interface ResumeResponse {
+  id: number;
+  userId: number;
+  fileName: string | null;
+  fileId: string | null;
+  experience: ExperienceItem[] | null;
+  education: EducationItem[] | null;
+  techStack: string[];
+  createdAt: string;
+}
+
 export interface NavItem {
   name: string;
   href: string;
