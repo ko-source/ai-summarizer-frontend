@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 import { nestApi } from "@/lib/axios";
-import { useAuthStore } from "./authStore";
 import type { SummaryResponse } from "@/types/types";
+import { createAuthHeaders, getAuthToken } from "@/lib/auth-helpers";
 
 type SummariesState = {
   summaries: SummaryResponse[];
@@ -16,12 +16,6 @@ type SummariesState = {
   summarizeText: (text: string) => Promise<void>;
   clearCurrentSummary: () => void;
 };
-
-const getAuthToken = (): string | null => useAuthStore.getState().token;
-
-const createAuthHeaders = (token: string) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
 
 export const useSummariesStore = create<SummariesState>((set, get) => ({
   summaries: [],

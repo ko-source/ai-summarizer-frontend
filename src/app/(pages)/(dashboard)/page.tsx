@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 import toast from "react-hot-toast";
 import { useSummariesStore } from "@/store/summaryStore";
-import SummaryDetail from "@/components/Summaries/summaryDetail";
-import SummaryCard from "@/components/Summaries/summaryCard";
+import SummaryDetail from "@/components/summaries/summaryDetail";
+import SummaryCard from "@/components/summaries/summaryCard";
 
 export default function Home() {
   const router = useRouter();

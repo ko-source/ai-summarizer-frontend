@@ -30,6 +30,11 @@ export default function Navbar() {
           current: pathname?.startsWith("/summaries"),
         },
         {
+          name: "Resumes",
+          href: "/resumes",
+          current: pathname?.startsWith("/resumes"),
+        },
+        {
           name: "Resume Extractor",
           href: "/resume-extractor",
           current: pathname === "/resume-extractor",

@@ -1,22 +1,24 @@
 "use client";
 
 import { create } from "zustand";
-import { useAuthStore } from "./authStore";
 import type { ResumeResponse } from "@/types/types";
 import { nestApi } from "@/lib/axios";
+import { createAuthHeaders, getAuthToken } from "@/lib/auth-helpers";
 
 type ResumeState = {
-  resume: ResumeResponse | null;
+  resumes: ResumeResponse[];
+  currentResume: ResumeResponse | null;
   isLoading: boolean;
   error: string | null;
   extractResume: (file: File) => Promise<void>;
+  loadResumes: () => Promise<void>;
+  loadResumeById: (id: number) => Promise<void>;
   clearResume: () => void;
 };
 
-const getAuthToken = (): string | null => useAuthStore.getState().token;
-
-export const useResumeStore = create<ResumeState>((set) => ({
-  resume: null,
+export const useResumeStore = create<ResumeState>((set, get) => ({
+  resumes: [],
+  currentResume: null,
   isLoading: false,
   error: null,
 
@@ -29,11 +31,19 @@ export const useResumeStore = create<ResumeState>((set) => ({
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await nestApi.post<ResumeResponse>("/resumes", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await nestApi.post<ResumeResponse>(
+        "/resumes",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      set({ resume: response, isLoading: false });
+      set({
+        currentResume: response,
+        resumes: [response, ...get().resumes],
+        isLoading: false,
+      });
     } catch (err) {
       set({
         isLoading: false,
@@ -43,5 +53,43 @@ export const useResumeStore = create<ResumeState>((set) => ({
     }
   },
 
-  clearResume: () => set({ resume: null, error: null }),
+  loadResumes: async () => {
+    const token = getAuthToken();
+    if (!token) return set({ error: "Not authenticated" });
+
+    set({ isLoading: true, error: null });
+    try {
+      const data = await nestApi.get<ResumeResponse[]>(
+        "/resumes",
+        createAuthHeaders(token)
+      );
+      set({ resumes: data, isLoading: false });
+    } catch (err) {
+      set({
+        isLoading: false,
+        error: (err as Error).message || "Failed to load resumes",
+      });
+    }
+  },
+
+  loadResumeById: async (id: number) => {
+    const token = getAuthToken();
+    if (!token) return set({ error: "Not authenticated" });
+
+    set({ isLoading: true, error: null });
+    try {
+      const data = await nestApi.get<ResumeResponse>(
+        `/resumes/${id}`,
+        createAuthHeaders(token)
+      );
+      set({ currentResume: data, isLoading: false });
+    } catch (err) {
+      set({
+        isLoading: false,
+        error: (err as Error).message || "Failed to load resume",
+      });
+    }
+  },
+
+  clearResume: () => set({ currentResume: null, error: null }),
 }));

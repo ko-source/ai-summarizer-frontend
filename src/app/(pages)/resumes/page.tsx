@@ -2,23 +2,23 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSummariesStore } from "@/store/summaryStore";
-import SummaryCard from "@/components/summaries/summaryCard";
+import { useResumeStore } from "@/store/resumeStore";
+import ResumeCard from "@/components/resumes/resumeCard";
 import ErrorMessage from "@/components/errorMessage";
 
-export default function SummariesPage() {
+export default function ResumesPage() {
   const router = useRouter();
-  const { summaries, error, loadSummaries } = useSummariesStore();
+  const { resumes, error, loadResumes } = useResumeStore();
 
   useEffect(() => {
-    loadSummaries();
-  }, [loadSummaries]);
+    loadResumes();
+  }, [loadResumes]);
 
   if (error) {
     return (
       <div className="flex flex-col min-h-screen p-6 md:px-12 px-6 max-w-7xl mx-auto">
         <div className="w-full">
-          <h1 className="text-3xl font-bold text-white mb-6">All Summaries</h1>
+          <h1 className="text-3xl font-bold text-white mb-6">All Resumes</h1>
           <ErrorMessage message={error} />
         </div>
       </div>
@@ -28,29 +28,29 @@ export default function SummariesPage() {
   return (
     <div className="flex flex-col min-h-screen p-6 md:px-12 px-6 max-w-7xl mx-auto">
       <div className="w-full">
-        <h1 className="text-3xl font-bold text-white mb-6">All Summaries</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">All Resumes</h1>
 
-        {summaries.length === 0 ? (
+        {resumes.length === 0 ? (
           <div className="bg-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-400 text-lg">No summaries yet.</p>
+            <p className="text-gray-400 text-lg">No resumes yet.</p>
             <p className="text-gray-500 mt-2">
-              Create your first summary on the{" "}
+              Upload your first resume in the{" "}
               <button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/resume-extractor")}
                 className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
               >
-                dashboard
+                resume extractor
               </button>
               .
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {summaries.map((summary) => (
-              <SummaryCard
-                key={summary.id}
-                summary={summary}
-                onClick={() => router.push(`/summaries/${summary.id}`)}
+            {resumes.map((resume) => (
+              <ResumeCard
+                key={resume.id}
+                resume={resume}
+                onClick={() => router.push(`/resumes/${resume.id}`)}
               />
             ))}
           </div>

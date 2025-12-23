@@ -2,17 +2,16 @@
 
 import FileIcon from "../svgIcons/FileIcon";
 import CloseIcon from "../svgIcons/CloseIcon";
+import { formatSize } from "@/lib/utils";
 
 interface FilePreviewProps {
   file: File;
   onRemove: () => void;
-  formatSize: (bytes: number) => string;
 }
 
 export default function FilePreview({
   file,
   onRemove,
-  formatSize,
 }: FilePreviewProps) {
   return (
     <div className="border border-gray-700 rounded-lg p-4 bg-gray-900/40">

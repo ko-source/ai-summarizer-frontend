@@ -1,31 +1,19 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useForm, Controller, useWatch, type Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { mixed, object } from "yup";
 import Button from "@/components/button";
 import toast from "react-hot-toast";
 import { useResumeStore } from "@/store/resumeStore";
-import FileUploadZone from "@/components/resume-extractor/FileUploadZone";
-import FilePreview from "@/components/resume-extractor/FilePreview";
-import ExperienceSection from "@/components/resume-extractor/ExperienceSection";
-import EducationSection from "@/components/resume-extractor/EducationSection";
-import TechStackSection from "@/components/resume-extractor/TechStackSection";
-
-const allowedMimeTypes = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-];
-
-const maxFileSize = 10 * 1024 * 1024; // 10MB
+import FileUploadZone from "@/components/resumes/FileUploadZone";
+import FilePreview from "@/components/resumes/FilePreview";
+import {
+  ALLOWED_RESUME_MIME_TYPES,
+  RESUME_MAX_FILE_SIZE_BYTES,
+} from "@/lib/constants";
 
 const schema = object({
   file: mixed()
@@ -35,24 +23,24 @@ const schema = object({
       "Invalid file type. Supported formats: PDF, Word, Text, or Images (JPG, PNG, GIF, WEBP).",
       (value) => {
         if (!value || !(value instanceof File)) return false;
-        return allowedMimeTypes.includes(value.type);
+        return ALLOWED_RESUME_MIME_TYPES.includes(value.type);
       }
     )
     .test("fileSize", "File size exceeds 10MB limit.", (value) => {
       if (!value || !(value instanceof File)) return false;
-      return value.size <= maxFileSize;
+      return value.size <= RESUME_MAX_FILE_SIZE_BYTES;
     }),
-});
+}).required();
 
 type FormValues = {
   file: File | null;
 };
 
 export default function ResumeExtractorPage() {
+  const router = useRouter();
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { resume, isLoading, error, extractResume, clearResume } =
-    useResumeStore();
+  const { isLoading, error, extractResume, clearResume } = useResumeStore();
 
   const {
     control,
@@ -60,7 +48,7 @@ export default function ResumeExtractorPage() {
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: yupResolver(schema) as never,
+    resolver: yupResolver(schema) as unknown as Resolver<FormValues>,
     defaultValues: {
       file: null,
     },
@@ -110,18 +98,16 @@ export default function ResumeExtractorPage() {
     try {
       await extractResume(data.file);
       toast.success("Resume extracted successfully!");
+      const resumeId = useResumeStore.getState().currentResume?.id;
+      if (resumeId) {
+        router.push(`/resumes/${resumeId}`);
+      }
     } catch {
       toast.error(error || "Failed to extract resume.");
     }
   };
 
-  const formatSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const KB_SIZE = 1024;
-    const sizes = ["Bytes", "KB", "MB"];
-    const index = Math.floor(Math.log(bytes) / Math.log(KB_SIZE));
-    return Math.round((bytes / Math.pow(KB_SIZE, index)) * 100) / 100 + " " + sizes[index];
-  };
+
 
   return (
     <div className="flex flex-col min-h-screen p-6 md:px-12 px-6 max-w-7xl mx-auto">
@@ -164,7 +150,6 @@ export default function ResumeExtractorPage() {
                       <FilePreview
                         file={file}
                         onRemove={handleRemoveFile}
-                        formatSize={formatSize}
                       />
                     )}
                     <input
@@ -198,21 +183,6 @@ export default function ResumeExtractorPage() {
           </form>
         </div>
 
-        {resume && (
-          <div className="w-full mt-6 space-y-8">
-            <ExperienceSection experience={resume.experience || []} />
-            <EducationSection education={resume.education || []} />
-            <TechStackSection techStack={resume.techStack || []} />
-
-            {!resume.experience?.length &&
-              !resume.education?.length &&
-              !resume.techStack?.length && (
-                <p className="text-sm text-gray-300">
-                  No structured data was extracted from this resume.
-                </p>
-              )}
-          </div>
-        )}
       </div>
     </div>
   );

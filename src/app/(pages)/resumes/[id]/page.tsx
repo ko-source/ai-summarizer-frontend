@@ -2,29 +2,29 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useSummariesStore } from "@/store/summaryStore";
-import SummaryDetail from "@/components/summaries/summaryDetail";
+import { useResumeStore } from "@/store/resumeStore";
+import ResumeDetail from "@/components/resumes/resumeDetail";
 import ErrorMessage from "@/components/errorMessage";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
-export default function SummaryDetailPage() {
+export default function ResumeDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { currentSummary, error, loadSummaryById } = useSummariesStore();
+  const { currentResume, error, loadResumeById } = useResumeStore();
 
-  const summaryId = params?.id ? Number(params.id) : null;
+  const resumeId = params?.id ? Number(params.id) : null;
 
   useEffect(() => {
-    if (summaryId) {
-      loadSummaryById(summaryId);
+    if (resumeId) {
+      loadResumeById(resumeId);
     }
-  }, [summaryId, loadSummaryById]);
+  }, [resumeId, loadResumeById]);
 
-  if (!summaryId || isNaN(summaryId)) {
+  if (!resumeId || isNaN(resumeId)) {
     return (
       <div className="flex flex-col min-h-screen p-6 md:px-12 px-6 max-w-7xl mx-auto">
         <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
-          <p className="text-red-400">Invalid summary ID</p>
+          <p className="text-red-400">Invalid resume ID</p>
         </div>
       </div>
     );
@@ -42,11 +42,11 @@ export default function SummaryDetailPage() {
 
         {error ? (
           <ErrorMessage message={error} />
-        ) : currentSummary ? (
-          <SummaryDetail summary={currentSummary} />
+        ) : currentResume ? (
+          <ResumeDetail resume={currentResume} />
         ) : (
           <div className="bg-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-400">Summary not found</p>
+            <p className="text-gray-400">Resume not found</p>
           </div>
         )}
       </div>
